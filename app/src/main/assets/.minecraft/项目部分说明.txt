@@ -1,0 +1,1 @@
+应用的"assets/config.properties"文件可修改直装包一些设置

@@ -1,19 +1,10 @@
 package ren.icraft.boat.installer;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Toast;
-
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
-
 import ren.icraft.boat.installer.operate.FilesPath;
 import ren.icraft.boat.installer.operate.InstallAndDelete;
 

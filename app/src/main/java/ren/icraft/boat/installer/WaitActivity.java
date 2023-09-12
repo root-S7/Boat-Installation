@@ -1,10 +1,21 @@
 package ren.icraft.boat.installer;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+
+import ren.icraft.boat.installer.operate.FilesPath;
+import ren.icraft.boat.installer.operate.InstallAndDelete;
 
 /**
  * @author Administrator
@@ -14,7 +25,11 @@ public class WaitActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wait);
+        //finish();
 
+        FutureTask<String> stringFutureTask = new FutureTask<>(new InstallAndDelete(this,new FilesPath(),getIntent().getBooleanExtra("isInstall", false)));
+        Thread thread = new Thread(stringFutureTask);
+        thread.start();
     }
     //用于记录返回键按下时间
     private long mPressedTime = 0;

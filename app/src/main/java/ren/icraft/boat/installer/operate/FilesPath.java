@@ -2,14 +2,16 @@ package ren.icraft.boat.installer.operate;
 
 import android.os.Environment;
 
+import java.io.Serializable;
+
 import ren.icraft.boat.installer.AppApplication;
 
-public class FilesPath {
+public class FilesPath implements Serializable{
     private String dataDirectory,minecraftDirectory,apkDirectory;
     public FilesPath() {
         dataDirectory = Environment.getExternalStorageDirectory() + "/" + AppApplication.properties.getProperty("putDirectory");
         minecraftDirectory = dataDirectory + "/.minecraft";
-        apkDirectory = minecraftDirectory + AppApplication.properties.getProperty("installAPKName");
+        apkDirectory = minecraftDirectory + "/" + AppApplication.properties.getProperty("installAPKName");
     }
     public String getDataDirectory() {
         return dataDirectory;

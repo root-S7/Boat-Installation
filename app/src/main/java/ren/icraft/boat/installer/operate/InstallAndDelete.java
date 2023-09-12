@@ -1,13 +1,9 @@
 package ren.icraft.boat.installer.operate;
 
 import android.app.Activity;
-import android.os.Environment;
 import android.widget.Toast;
-
+import java.io.Serializable;
 import java.util.concurrent.Callable;
-
-import ren.icraft.boat.installer.AppApplication;
-import ren.icraft.boat.installer.MainActivity;
 import ren.icraft.boat.installer.R;
 import ren.icraft.boat.installer.tools.AssetsToStorageDir;
 import ren.icraft.boat.installer.tools.DeleteResources;
@@ -16,7 +12,7 @@ import ren.icraft.boat.installer.tools.IntallAPK;
 /**
  * @author Administrator
 **/
-public class InstallAndDelete implements Callable<String> {
+public class InstallAndDelete implements Callable<String>, Serializable {
     Activity activity;
     FilesPath filesPath;
     boolean isInstall;

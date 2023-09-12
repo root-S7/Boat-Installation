@@ -13,33 +13,21 @@ import androidx.annotation.*;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import java.io.File;
-import java.util.Properties;
-import java.util.concurrent.FutureTask;
-
-import ren.icraft.boat.installer.operate.FilesPath;
-import ren.icraft.boat.installer.operate.InstallAndDelete;
+import java.io.Serializable;
 import ren.icraft.boat.installer.tools.*;
 
 /**
  * @author Administrator
 **/
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    private LinearLayout linearLayout1;
-    private RelativeLayout relativeLayout1,relativeLayout2;
-    private FilesPath filesPath;
+public class MainActivity extends AppCompatActivity implements View.OnClickListener,Serializable{
     private String[] legacyAccessFilesPermission = {Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        filesPath = new FilesPath();
         init();
     }
     private void init(){
-        linearLayout1 = findViewById(R.id.app_1);
-        relativeLayout1 = findViewById(R.id.app_3);
-        relativeLayout2 = findViewById(R.id.app_4);
         findViewById(R.id.delete_resource).setOnClickListener(this);
         findViewById(R.id.install_resource).setOnClickListener(this);
         findViewById(R.id.qq_group).setOnClickListener(this);
@@ -88,9 +76,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 isInstall = true;
             case R.id.delete_resource:
-                FutureTask<String> stringFutureTask = new FutureTask<>(new InstallAndDelete(MainActivity.this,filesPath,isInstall));
-                Thread thread = new Thread(stringFutureTask);
-                thread.start();
+                Intent intent = new Intent(this,WaitActivity.class);
+
+                intent.putExtra("isInstall",isInstall);
+
+                startActivity(intent);
                 break;
             case R.id.qq_group:
                 QQGroup.joinQQGroup(getApplicationContext(),AppApplication.properties.getProperty("QQGroupKey"));
@@ -100,27 +90,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
     }
-    /**
-    private void doSome(boolean writeAssetsToStorageDir){
-        startActivity(new Intent(MainActivity.this,WaitActivity.class));
-        Toast.makeText(getApplicationContext(), R.string.wait_delete, Toast.LENGTH_SHORT).show();
-        //ViewSwitch.hideLayoutViews(linearLayout1,relativeLayout1,relativeLayout2);
-        Thread activity = new Thread(() -> {
-            DeleteResources.deleteFolder(Environment.getExternalStorageDirectory() + "/" + putDirectory);
-            if (writeAssetsToStorageDir) {
-                MainActivity.this.runOnUiThread(() -> {
-                    Toast.makeText(getApplicationContext(), R.string.wait_install_resources, Toast.LENGTH_SHORT).show();
-                });
-                AssetsToStorageDir.copyFilesFromAssets(getApplicationContext(), ".minecraft", Environment.getExternalStorageDirectory() + "/" + putDirectory + "/.minecraft");
-                MainActivity.this.runOnUiThread(() -> {
-                    Toast.makeText(getApplicationContext(), R.string.wait_install_apk, Toast.LENGTH_LONG).show();
-                });
-                IntallAPK.install(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + putDirectory + "/.minecraft/" + properties.getProperty("installAPKName"), getApplicationContext());
-            }
-        });
-        activity.start();
-    }
-    **/
 
     //用于记录返回键按下时间
     private long mPressedTime = 0;

@@ -13,35 +13,6 @@
             android:layout_height="wrap_content">
         </TextView>
     </LinearLayout>
-    <LinearLayout
-        android:id="@+id/app_2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:visibility="invisible">
-        <ProgressBar
-            android:minHeight="108dp"
-            android:maxHeight="132dp"
-            android:id="@+id/wait_progress_bar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-        </ProgressBar>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="8dp">
-        </LinearLayout>
-        <TextView
-            android:id="@+id/wait_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/wait_title"
-            android:textSize="20sp">
-        </TextView>
-    </LinearLayout>
     <RelativeLayout
         android:id="@+id/app_3"
         android:layout_width="match_parent"

@@ -15,35 +15,36 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import java.io.File;
 import java.util.Properties;
+import java.util.concurrent.FutureTask;
+
+import ren.icraft.boat.installer.operate.FilesPath;
+import ren.icraft.boat.installer.operate.InstallAndDelete;
 import ren.icraft.boat.installer.tools.*;
 
 /**
  * @author Administrator
 **/
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    private LinearLayout linearLayout1,linearLayout2;
+    private LinearLayout linearLayout1;
     private RelativeLayout relativeLayout1,relativeLayout2;
+    private FilesPath filesPath;
     private String[] legacyAccessFilesPermission = {Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE};
-    private Properties properties;
-    private String putDirectory;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        filesPath = new FilesPath();
         init();
     }
     private void init(){
-        properties = new PropertiesFileParse("config.properties", getApplicationContext()).getProperties();
-        putDirectory = properties.getProperty("putDirectory");
         linearLayout1 = findViewById(R.id.app_1);
         relativeLayout1 = findViewById(R.id.app_3);
         relativeLayout2 = findViewById(R.id.app_4);
-        linearLayout2 = findViewById(R.id.app_2);
         findViewById(R.id.delete_resource).setOnClickListener(this);
         findViewById(R.id.install_resource).setOnClickListener(this);
         findViewById(R.id.qq_group).setOnClickListener(this);
-        if("true".equals(properties.getProperty("enableAnnouncement"))){
-            new OnlineAnnouncement(findViewById(R.id.network_announcement),MainActivity.this,properties.getProperty("AnnouncementURL")).start();
+        if("true".equals(AppApplication.properties.getProperty("enableAnnouncement"))){
+            new OnlineAnnouncement(findViewById(R.id.network_announcement),MainActivity.this,AppApplication.properties.getProperty("AnnouncementURL")).start();
         }
     }
     @Override
@@ -74,12 +75,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
     @SuppressLint("NonConstantResourceId")
     private void onClickNextStep(View v){
+        boolean isInstall = false;
         switch(v.getId()){
-            case R.id.delete_resource:
-                if(new File(Environment.getExternalStorageDirectory() + "/" + putDirectory).exists()){
-                    doSome(false);
-                }
-                break;
             case R.id.install_resource:
                 if((Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) && !(getPackageManager().canRequestPackageInstalls())){
                     Intent intent = new Intent();
@@ -89,37 +86,54 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     startActivity(intent);
                     break;
                 }
-                doSome(true);
+                isInstall = true;
+            case R.id.delete_resource:
+                FutureTask<String> stringFutureTask = new FutureTask<>(new InstallAndDelete(MainActivity.this,filesPath,isInstall));
+                Thread thread = new Thread(stringFutureTask);
+                thread.start();
                 break;
             case R.id.qq_group:
-                QQGroup.joinQQGroup(getApplicationContext(),properties.getProperty("QQGroupKey"));
+                QQGroup.joinQQGroup(getApplicationContext(),AppApplication.properties.getProperty("QQGroupKey"));
                 break;
             default:
                 Log.d("点击事件", "未能匹配有效按钮！");
                 break;
         }
     }
+    /**
     private void doSome(boolean writeAssetsToStorageDir){
+        startActivity(new Intent(MainActivity.this,WaitActivity.class));
         Toast.makeText(getApplicationContext(), R.string.wait_delete, Toast.LENGTH_SHORT).show();
-        ViewSwitch.hideLayoutViews(linearLayout1,relativeLayout1,relativeLayout2);
-        ViewSwitch.displayLayoutViews(linearLayout2);
-        new Thread(()->{
+        //ViewSwitch.hideLayoutViews(linearLayout1,relativeLayout1,relativeLayout2);
+        Thread activity = new Thread(() -> {
             DeleteResources.deleteFolder(Environment.getExternalStorageDirectory() + "/" + putDirectory);
-            if(writeAssetsToStorageDir){
+            if (writeAssetsToStorageDir) {
                 MainActivity.this.runOnUiThread(() -> {
-                    Toast.makeText(getApplicationContext(),R.string.wait_install_resources,Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), R.string.wait_install_resources, Toast.LENGTH_SHORT).show();
                 });
-                AssetsToStorageDir.copyFilesFromAssets(getApplicationContext(),".minecraft",Environment.getExternalStorageDirectory() + "/" + putDirectory + "/.minecraft");
+                AssetsToStorageDir.copyFilesFromAssets(getApplicationContext(), ".minecraft", Environment.getExternalStorageDirectory() + "/" + putDirectory + "/.minecraft");
                 MainActivity.this.runOnUiThread(() -> {
-                    Toast.makeText(getApplicationContext(),R.string.wait_install_apk,Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), R.string.wait_install_apk, Toast.LENGTH_LONG).show();
                 });
-                IntallAPK.install(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + putDirectory + "/.minecraft/" + properties.getProperty("installAPKName"),getApplicationContext());
+                IntallAPK.install(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + putDirectory + "/.minecraft/" + properties.getProperty("installAPKName"), getApplicationContext());
             }
-            MainActivity.this.runOnUiThread(() ->{
-                ViewSwitch.hideLayoutViews(linearLayout2);
-                ViewSwitch.displayLayoutViews(linearLayout1,relativeLayout1,relativeLayout2);
-            });
-        }).start();
+        });
+        activity.start();
+    }
+    **/
+
+    //用于记录返回键按下时间
+    private long mPressedTime = 0;
+    @Override
+    public void onBackPressed() {
+        long mNowTime = System.currentTimeMillis();
+        if ((mNowTime - mPressedTime) > 2000) {
+            Toast.makeText(this, "再按一次返回键退出应用程序", Toast.LENGTH_SHORT).show();
+            mPressedTime = mNowTime;
+        } else {
+            this.finish();
+            System.exit(0);
+        }
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

@@ -1,14 +1,15 @@
 package ren.icraft.boat.installer.operate;
 
+import android.content.Context;
 import android.os.Environment;
 import ren.icraft.boat.installer.AppApplication;
 
 public class FilesPath{
     private String dataDirectory,minecraftDirectory,apkDirectory;
-    public FilesPath() {
+    public FilesPath(Context context) {
         dataDirectory = Environment.getExternalStorageDirectory() + "/" + AppApplication.properties.getProperty("putDirectory");
         minecraftDirectory = dataDirectory + "/.minecraft";
-        apkDirectory = minecraftDirectory + "/" + AppApplication.properties.getProperty("installAPKName");
+        apkDirectory = context.getExternalFilesDir(null) + "/" + AppApplication.properties.getProperty("installAPKName");
     }
     public String getDataDirectory() {
         return dataDirectory;

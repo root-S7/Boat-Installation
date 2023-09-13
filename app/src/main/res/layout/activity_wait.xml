@@ -11,13 +11,19 @@
         android:gravity="center"
         android:orientation="vertical">
         <TextView
-            android:id="@+id/loading_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/wait_title"
             android:textColor="#5C6BC0"
-            android:textSize="32sp"
-            android:textStyle="bold" />
+            android:textSize="30sp"
+            android:textStyle="bold"/>
+        <TextView
+            android:id="@+id/loading_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            android:textStyle="bold"/>
         <ProgressBar
             android:id="@+id/loading_progress_bar"
             style="@style/Widget.AppCompat.ProgressBar.Horizontal"
@@ -27,7 +33,7 @@
             android:minHeight="24dp"/>
         <TextView
             android:id="@+id/loading_value"
-            android:textSize="20sp"
+            android:textSize="22sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="0.00%"

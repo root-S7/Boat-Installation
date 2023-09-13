@@ -2,7 +2,13 @@ package ren.icraft.boat.installer.tools;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
+
+import androidx.core.content.FileProvider;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -277,4 +283,17 @@ public class FileUtils {
         return size;
     }
 
+    //APK安装
+    public static void installAPK(String path, Context context) {
+        File apk = new File(path);
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        Uri uri = Uri.fromFile(apk);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
+            uri = FileProvider.getUriForFile(context, "ren.icraft.boat.installer.fileProvider", apk);
+        }
+        intent.setDataAndType(uri, "application/vnd.android.package-archive");
+        context.startActivity(intent);
+    }
 }

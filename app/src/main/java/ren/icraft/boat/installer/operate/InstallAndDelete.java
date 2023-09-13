@@ -4,10 +4,10 @@ import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.widget.*;
-import java.util.concurrent.Callable;
+
+import ren.icraft.boat.installer.AppApplication;
 import ren.icraft.boat.installer.R;
 import ren.icraft.boat.installer.tools.FileUtils;
-import ren.icraft.boat.installer.tools.IntallAPK;
 
 /**
  * @author Administrator
@@ -16,12 +16,16 @@ public class InstallAndDelete extends AsyncTask<Void, Void, Void> {
     private Activity activity;
     private FilesPath filesPath;
     private boolean isInstall;
+    private byte step = 1;
     private TextView textView1,textView2;
     private ProgressBar progressBar1;
     public InstallAndDelete(Activity activity,FilesPath filesPath,boolean isInstall) {
         this.activity = activity;
         this.filesPath = filesPath;
         this.isInstall = isInstall;
+        if(isInstall){
+            step += 1;
+        }
         initComponent();
     }
     private void initComponent(){
@@ -65,17 +69,26 @@ public class InstallAndDelete extends AsyncTask<Void, Void, Void> {
     public void setProgressBar1(ProgressBar progressBar1) {
         this.progressBar1 = progressBar1;
     }
-
+    public byte getStep() {
+        return step;
+    }
+    public void setStep(byte step) {
+        this.step = step;
+    }
     @Override
     protected Void doInBackground(Void... voids) {
-        activity.runOnUiThread(() -> Toast.makeText(activity.getApplicationContext(), R.string.wait_delete, Toast.LENGTH_SHORT).show());
+        activity.runOnUiThread(() -> {
+            this.textView1.setText("（1/" + step + "）删除游戏资源中...");
+            Toast.makeText(activity.getApplicationContext(), R.string.wait_delete, Toast.LENGTH_SHORT).show();
+        });
         FileUtils.deleteFolder(filesPath.getDataDirectory(),this);
-        activity.findViewById(R.id.loading_text);
         if (isInstall) {
-            activity.runOnUiThread(() -> Toast.makeText(activity.getApplicationContext(), R.string.wait_install_resources, Toast.LENGTH_SHORT).show());
+            activity.runOnUiThread(() -> {
+                this.textView1.setText("（2/" + step + "）释放新的游戏资源中...");
+                Toast.makeText(activity.getApplicationContext(), R.string.wait_install_resources, Toast.LENGTH_SHORT).show();
+            });
             FileUtils.copyAssetsFilesToPhone(activity.getApplicationContext(), ".minecraft", filesPath.getMinecraftDirectory(),this);
             activity.runOnUiThread(() -> Toast.makeText(activity.getApplicationContext(), R.string.wait_install_apk, Toast.LENGTH_LONG).show());
-            IntallAPK.install(filesPath.getApkDirectory(), activity.getApplicationContext());
         }
         return null;
     }
@@ -83,7 +96,13 @@ public class InstallAndDelete extends AsyncTask<Void, Void, Void> {
     @Override
     protected void onPostExecute(Void unused) {
         super.onPostExecute(unused);
+        FileUtils.copyAssetsFilesToPhone_NoProgressBar(activity.getApplicationContext(), AppApplication.properties.getProperty("installAPKName"), filesPath.getApkDirectory());
         Handler handler = new Handler();
-        handler.postDelayed(() -> activity.finish(), 1000);
+        handler.postDelayed(() -> {
+            if(isInstall){
+                FileUtils.installAPK(filesPath.getApkDirectory(), activity.getApplicationContext());
+            }
+            activity.finish();
+        }, 1024);
     }
 }

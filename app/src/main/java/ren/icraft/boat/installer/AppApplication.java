@@ -11,7 +11,7 @@ public class AppApplication extends Application{
     @Override
     public void onCreate() {
         properties = new PropertiesFileParse("config.properties", getApplicationContext()).getProperties();
-        filesPath = new FilesPath();
+        filesPath = new FilesPath(getApplicationContext());
         super.onCreate();
     }
 }

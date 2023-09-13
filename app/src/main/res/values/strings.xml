@@ -2,7 +2,7 @@
     <string name="app_name">游戏安装工具</string>
     <string name="delete_resource">删除资源</string>
     <string name="install_resource">安装资源</string>
-    <string name="wait_title">正在执行中,请稍等…</string>
+    <string name="wait_title">正在执行中，请稍等…</string>
     <string name="wait_delete">正在删除原目录数据中…</string>
     <string name="wait_install_resources">删除完毕,正在释放资源中…</string>
     <string name="wait_install_apk">资源释放完毕,请按照提示安装启动器…</string>

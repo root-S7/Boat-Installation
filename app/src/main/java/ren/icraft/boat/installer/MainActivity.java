@@ -94,8 +94,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
     }
-
-    //用于记录返回键按下时间
     private long mPressedTime = 0;
     @Override
     public void onBackPressed() {

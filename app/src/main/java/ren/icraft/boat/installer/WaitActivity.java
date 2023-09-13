@@ -20,7 +20,6 @@ public class WaitActivity extends AppCompatActivity {
         InstallAndDelete installAndDelete = new InstallAndDelete(this,AppApplication.filesPath,getIntent().getBooleanExtra("isInstall", false));
         installAndDelete.execute();
     }
-    //用于记录返回键按下时间
     private long mPressedTime = 0;
     @Override
     public void onBackPressed() {

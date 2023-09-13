@@ -3,9 +3,6 @@ package ren.icraft.boat.installer.tools;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.util.Log;
-import android.util.Patterns;
-import android.webkit.URLUtil;
 
 public class QQGroup{
     public final static String QQ_GROUP_API = "mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26jump_from%3Dwebapi%26k%3D";

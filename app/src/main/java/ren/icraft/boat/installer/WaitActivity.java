@@ -18,7 +18,7 @@ public class WaitActivity extends AppCompatActivity {
         setContentView(R.layout.activity_wait);
         //finish();
 
-        FutureTask<String> stringFutureTask = new FutureTask<>(new InstallAndDelete(this,new FilesPath(),getIntent().getBooleanExtra("isInstall", false)));
+        FutureTask<String> stringFutureTask = new FutureTask<>(new InstallAndDelete(this,AppApplication.filesPath,getIntent().getBooleanExtra("isInstall", false)));
         Thread thread = new Thread(stringFutureTask);
         thread.start();
     }

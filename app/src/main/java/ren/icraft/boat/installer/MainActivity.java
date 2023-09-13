@@ -13,6 +13,7 @@ import androidx.annotation.*;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import java.io.File;
 import java.io.Serializable;
 import ren.icraft.boat.installer.tools.*;
 
@@ -77,10 +78,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 isInstall = true;
             case R.id.delete_resource:
                 Intent intent = new Intent(this,WaitActivity.class);
-
                 intent.putExtra("isInstall",isInstall);
 
-                startActivity(intent);
+                if((v.getId() == R.id.delete_resource) && (new File(AppApplication.filesPath.getDataDirectory()).exists())){
+                    startActivity(intent);
+                }else if (v.getId() == R.id.install_resource){
+                    startActivity(intent);
+                }
                 break;
             case R.id.qq_group:
                 QQGroup.joinQQGroup(getApplicationContext(),AppApplication.properties.getProperty("QQGroupKey"));

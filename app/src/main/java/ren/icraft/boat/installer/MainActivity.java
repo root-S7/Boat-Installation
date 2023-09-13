@@ -25,9 +25,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        init();
+        initComponent();
     }
-    private void init(){
+    private void initComponent(){
         findViewById(R.id.delete_resource).setOnClickListener(this);
         findViewById(R.id.install_resource).setOnClickListener(this);
         findViewById(R.id.qq_group).setOnClickListener(this);

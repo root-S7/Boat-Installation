@@ -1,6 +1,8 @@
 package ren.icraft.boat.installer.tools;
 
 import android.content.Context;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -11,6 +13,8 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
 import java.util.concurrent.atomic.AtomicLong;
+
+import ren.icraft.boat.installer.operate.InstallAndDelete;
 
 public class FileUtils {
     public static void copyAssetsFilesToPhone_NoProgressBar(Context context, String assetsPath, String savePath){
@@ -44,6 +48,11 @@ public class FileUtils {
         }
     }
 
+    //单位均为Byte
+    private static long deleteFileSizeCount = 0;
+    private static long pathSize;
+    private static int nextProgressShare;
+    private static double nowProgressShare;
     public static void copyAssetsFilesToPhone(Context context, String assetsPath, String savePath){
         try {
             // 获取assets目录下的所有文件及目录名
@@ -89,36 +98,44 @@ public class FileUtils {
     }
     /**
      * 删除文件夹以及目录下的文件
-     * @param   filePath 被删除目录的文件路径
+     * @param   path 被删除目录的文件路径
      * @return  目录删除成功返回true，否则返回false
     **/
-    public static boolean deleteDirectory(String filePath) {
-        boolean flag = false;
+    private static void deleteDirectory(String path,InstallAndDelete installAndDelete){
         //如果filePath不以文件分隔符结尾，自动添加文件分隔符
-        if (!filePath.endsWith(File.separator)) {
-            filePath = filePath + File.separator;
+        if (!path.endsWith(File.separator)) {
+            path = path + File.separator;
         }
-        File dirFile = new File(filePath);
+        File dirFile = new File(path);
         if (!dirFile.exists() || !dirFile.isDirectory()) {
-            return false;
+            return;
         }
-        flag = true;
+        //统计path的根目录下有多少个文件夹和文件总和
         File[] files = dirFile.listFiles();
         //遍历删除文件夹下的所有文件(包括子目录)
         for (int i = 0; i < files.length; i++) {
             if (files[i].isFile()) {
-                //删除子文件
-                flag = deleteFile(files[i].getAbsolutePath());
-                if (!flag) {break;}
+                long thisFileSize = getPathSize(files[i].getAbsolutePath());
+                //删除文件
+                deleteFile(files[i].getAbsolutePath());
+                deleteFileSizeCount += thisFileSize;
+                installAndDelete.getActivity().runOnUiThread(() -> {
+                    nowProgressShare = (((double)deleteFileSizeCount / pathSize) * 100);
+                    if(nowProgressShare > nextProgressShare){
+                        installAndDelete.getProgressBar1().setProgress((int)nowProgressShare);
+                        nextProgressShare = (int)nowProgressShare + 1;
+                        //Log.d("事件4", "nowProgressShare ->" + nowProgressShare + "，nextProgressShare ->" + nextProgressShare);
+                    }
+                    installAndDelete.getTextView2().setText(String.format("%.2f",nowProgressShare) + " %");
+                    //Log.d("事件5", "当前文件大小" + thisFileSize + "Byte，已累加大小" + deleteFileSizeCount + "Byte，需要删除的文件总大小" + pathSize + "Byte，当前进度删除" + nowProgressShare + " %");
+                });
             } else {
-                //删除子目录
-                flag = deleteDirectory(files[i].getAbsolutePath());
-                if (!flag) {break;}
+                //删除目录[递归先删除里面文件最后删空目录]
+                deleteDirectory(files[i].getAbsolutePath(),installAndDelete);
             }
         }
-        if (!flag) return false;
         //删除当前空目录
-        return dirFile.delete();
+        dirFile.delete();
     }
     public static boolean deleteDirectory_NoProgressBar(String filePath) {
         boolean flag = false;
@@ -140,7 +157,7 @@ public class FileUtils {
                 if (!flag) {break;}
             } else {
                 //删除子目录
-                flag = deleteDirectory(files[i].getAbsolutePath());
+                flag = deleteDirectory_NoProgressBar(files[i].getAbsolutePath());
                 if (!flag) {break;}
             }
         }
@@ -153,7 +170,7 @@ public class FileUtils {
      * @param filePath  要删除的目录或文件
      * @return 删除成功返回 true，否则返回 false。
     **/
-    public static boolean deleteFolder(String filePath,boolean isProgressBar) {
+    public static boolean deleteFolder(String filePath,InstallAndDelete installAndDelete) {
         File file = new File(filePath);
         if (!file.exists()) {
             return false;
@@ -163,7 +180,14 @@ public class FileUtils {
                 return deleteFile(filePath);
             } else {
                 // 为目录时调用删除目录方法
-                if(isProgressBar) return deleteDirectory(filePath);
+                if(installAndDelete != null) {
+                    pathSize = getPathSize(filePath);
+                    if(pathSize > 0){
+                        installAndDelete.getProgressBar1().setMax(100);
+                    }
+                    deleteDirectory(filePath,installAndDelete);
+                    return new File(filePath).exists();
+                }
                 else return deleteDirectory_NoProgressBar(filePath);
             }
         }

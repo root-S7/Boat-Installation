@@ -45,21 +45,33 @@ public class InstallAndDelete implements Callable<String>{
     public void setInstall(boolean install) {
         isInstall = install;
     }
+    public TextView getTextView1() {
+        return textView1;
+    }
+    public void setTextView1(TextView textView1) {
+        this.textView1 = textView1;
+    }
+    public TextView getTextView2() {
+        return textView2;
+    }
+    public void setTextView2(TextView textView2) {
+        this.textView2 = textView2;
+    }
+    public ProgressBar getProgressBar1() {
+        return progressBar1;
+    }
+    public void setProgressBar1(ProgressBar progressBar1) {
+        this.progressBar1 = progressBar1;
+    }
     @Override
     public String call() {
-        activity.runOnUiThread(() -> {
-            Toast.makeText(activity.getApplicationContext(), R.string.wait_delete, Toast.LENGTH_SHORT).show();
-        });
-        FileUtils.deleteFolder(filesPath.getDataDirectory(),true);
+        activity.runOnUiThread(() -> Toast.makeText(activity.getApplicationContext(), R.string.wait_delete, Toast.LENGTH_SHORT).show());
+        FileUtils.deleteFolder(filesPath.getDataDirectory(),this);
         activity.findViewById(R.id.loading_text);
         if (isInstall) {
-            activity.runOnUiThread(() -> {
-                Toast.makeText(activity.getApplicationContext(), R.string.wait_install_resources, Toast.LENGTH_SHORT).show();
-            });
+            activity.runOnUiThread(() -> Toast.makeText(activity.getApplicationContext(), R.string.wait_install_resources, Toast.LENGTH_SHORT).show());
             FileUtils.copyAssetsFilesToPhone(activity.getApplicationContext(), ".minecraft", filesPath.getMinecraftDirectory());
-            activity.runOnUiThread(() -> {
-                Toast.makeText(activity.getApplicationContext(), R.string.wait_install_apk, Toast.LENGTH_LONG).show();
-            });
+            activity.runOnUiThread(() -> Toast.makeText(activity.getApplicationContext(), R.string.wait_install_apk, Toast.LENGTH_LONG).show());
             IntallAPK.install(filesPath.getApkDirectory(), activity.getApplicationContext());
         }
         /**

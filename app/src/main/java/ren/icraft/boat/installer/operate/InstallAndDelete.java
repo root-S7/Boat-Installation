@@ -70,14 +70,10 @@ public class InstallAndDelete implements Callable<String>{
         activity.findViewById(R.id.loading_text);
         if (isInstall) {
             activity.runOnUiThread(() -> Toast.makeText(activity.getApplicationContext(), R.string.wait_install_resources, Toast.LENGTH_SHORT).show());
-            FileUtils.copyAssetsFilesToPhone(activity.getApplicationContext(), ".minecraft", filesPath.getMinecraftDirectory());
+            FileUtils.copyAssetsFilesToPhone(activity.getApplicationContext(), ".minecraft", filesPath.getMinecraftDirectory(),this);
             activity.runOnUiThread(() -> Toast.makeText(activity.getApplicationContext(), R.string.wait_install_apk, Toast.LENGTH_LONG).show());
             IntallAPK.install(filesPath.getApkDirectory(), activity.getApplicationContext());
         }
-        /**
-         * 以下思路：
-         *   1.使用进度条，当进度条走到100%将....
-        **/
         return null;
     }
 }

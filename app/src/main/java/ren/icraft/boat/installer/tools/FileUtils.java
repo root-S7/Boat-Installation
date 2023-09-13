@@ -1,17 +1,12 @@
 package ren.icraft.boat.installer.tools;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import android.util.Log;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinTask;
-import java.util.concurrent.RecursiveTask;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import ren.icraft.boat.installer.operate.InstallAndDelete;
@@ -51,9 +46,18 @@ public class FileUtils {
     //单位均为Byte
     private static long deleteFileSizeCount = 0;
     private static long pathSize;
-    private static int nextProgressShare;
     private static double nowProgressShare;
-    public static void copyAssetsFilesToPhone(Context context, String assetsPath, String savePath){
+    public static void copyAssetsFilesToPhone(Context context, String assetsPath, String savePath, InstallAndDelete installAndDelete){
+        pathSize = getAssetsFolderSize(installAndDelete.getActivity(),".minecraft");
+        if(pathSize > 0){
+            installAndDelete.getProgressBar1().setMax(100);
+        }
+        Log.d("事件", String.valueOf(pathSize));
+        deleteFileSizeCount = 0;
+        nowProgressShare = 0;
+        startCopyAssetsFilesToPhone(context,assetsPath,savePath,installAndDelete);
+    }
+    private static void startCopyAssetsFilesToPhone(Context context, String assetsPath, String savePath, InstallAndDelete installAndDelete){
         try {
             // 获取assets目录下的所有文件及目录名
             String[] fileNames = context.getAssets().list(assetsPath);
@@ -62,18 +66,27 @@ public class FileUtils {
                 File file = new File(savePath);
                 file.mkdirs();// 如果文件夹不存在，则递归
                 for (String fileName : fileNames) {
-                    copyAssetsFilesToPhone(context, assetsPath + "/" + fileName, savePath + "/" + fileName);
+                    startCopyAssetsFilesToPhone(context, assetsPath + "/" + fileName, savePath + "/" + fileName, installAndDelete);
                 }
             } else {// 如果是文件
                 InputStream is = context.getAssets().open(assetsPath);
                 FileOutputStream fos = new FileOutputStream(savePath);
-                byte[] buffer = new byte[1024];
+                byte[] buffer = new byte[8192];
                 int byteCount = 0;
                 // 循环从输入流读取
                 while ((byteCount = is.read(buffer)) != -1) {
                     // 将读取的输入流写入到输出流
                     fos.write(buffer, 0, byteCount);
+
+                    deleteFileSizeCount += byteCount;
                 }
+                installAndDelete.getActivity().runOnUiThread(() -> {
+                    nowProgressShare = (((double)deleteFileSizeCount / pathSize) * 100);
+                    installAndDelete.getProgressBar1().setProgress((int)nowProgressShare);
+                    installAndDelete.getTextView2().setText(String.format("%.2f",nowProgressShare) + " %");
+                    //Log.d("事件5", "当前文件大小" + thisFileSize + "Byte，已累加大小" + deleteFileSizeCount + "Byte，需要删除的文件总大小" + pathSize + "Byte，当前进度删除" + nowProgressShare + " %");
+                });
+                //Log.d("事件", String.valueOf(deleteFileSizeCount));
                 // 刷新缓冲区
                 fos.flush();
                 is.close();
@@ -101,7 +114,8 @@ public class FileUtils {
      * @param   path 被删除目录的文件路径
      * @return  目录删除成功返回true，否则返回false
     **/
-    private static void deleteDirectory(String path,InstallAndDelete installAndDelete){
+    @SuppressLint({"DefaultLocale", "SetTextI18n"})
+    private static void deleteDirectory(String path, InstallAndDelete installAndDelete){
         //如果filePath不以文件分隔符结尾，自动添加文件分隔符
         if (!path.endsWith(File.separator)) {
             path = path + File.separator;
@@ -115,19 +129,13 @@ public class FileUtils {
         //遍历删除文件夹下的所有文件(包括子目录)
         for (int i = 0; i < files.length; i++) {
             if (files[i].isFile()) {
-                long thisFileSize = getPathSize(files[i].getAbsolutePath());
+                deleteFileSizeCount += getPathSize(files[i].getAbsolutePath());
                 //删除文件
                 deleteFile(files[i].getAbsolutePath());
-                deleteFileSizeCount += thisFileSize;
                 installAndDelete.getActivity().runOnUiThread(() -> {
                     nowProgressShare = (((double)deleteFileSizeCount / pathSize) * 100);
-                    if(nowProgressShare > nextProgressShare){
-                        installAndDelete.getProgressBar1().setProgress((int)nowProgressShare);
-                        nextProgressShare = (int)nowProgressShare + 1;
-                        //Log.d("事件4", "nowProgressShare ->" + nowProgressShare + "，nextProgressShare ->" + nextProgressShare);
-                    }
+                    installAndDelete.getProgressBar1().setProgress((int)nowProgressShare);
                     installAndDelete.getTextView2().setText(String.format("%.2f",nowProgressShare) + " %");
-                    //Log.d("事件5", "当前文件大小" + thisFileSize + "Byte，已累加大小" + deleteFileSizeCount + "Byte，需要删除的文件总大小" + pathSize + "Byte，当前进度删除" + nowProgressShare + " %");
                 });
             } else {
                 //删除目录[递归先删除里面文件最后删空目录]
@@ -185,6 +193,8 @@ public class FileUtils {
                     if(pathSize > 0){
                         installAndDelete.getProgressBar1().setMax(100);
                     }
+                    deleteFileSizeCount = 0;
+                    nowProgressShare = 0;
                     deleteDirectory(filePath,installAndDelete);
                     return new File(filePath).exists();
                 }
@@ -195,7 +205,7 @@ public class FileUtils {
 
     /**
      * 多线程统计目录大小(适合特别多小文件使用)
-     * 该方法仅适合有公有，私有目录
+     * 该方法仅适合有权限的“公有，私有目录”
     **/
     public static long getPathSize(String dir) {
         File path = new File(dir);
@@ -235,4 +245,37 @@ public class FileUtils {
     private static final class IoOperateHolder {
         final static ForkJoinPool FORKJOIN_POOL = new ForkJoinPool();
     }
+    /**
+     * 单线程统计当前应用的assets目录种指定目录大小
+     * 该方法不推荐用于计算小文件较多目录否则可能会崩溃
+    **/
+    public static long getAssetsFolderSize(Context context, String srcPath){
+        String[] fileNames;
+        try {
+            fileNames = context.getAssets().list(srcPath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        long size = 0;
+        if (fileNames.length > 0) {
+            for (String fileName : fileNames) {
+                //assets文件夹下的目录
+                if (!srcPath.equals("")) {
+                    size += getAssetsFolderSize(context, srcPath + File.separator + fileName);
+                    //assets 文件夹
+                } else {
+                    size += getAssetsFolderSize(context, fileName);
+                }
+            }
+        } else {
+            try {
+                InputStream is = context.getAssets().open(srcPath);
+                size += is.available();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return size;
+    }
+
 }

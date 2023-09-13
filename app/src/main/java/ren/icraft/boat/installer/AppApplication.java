@@ -1,9 +1,7 @@
 package ren.icraft.boat.installer;
 
 import android.app.Application;
-
 import java.util.Properties;
-
 import ren.icraft.boat.installer.operate.FilesPath;
 import ren.icraft.boat.installer.tools.PropertiesFileParse;
 

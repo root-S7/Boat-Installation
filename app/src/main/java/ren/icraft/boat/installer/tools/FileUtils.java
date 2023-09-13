@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
-
 import ren.icraft.boat.installer.operate.InstallAndDelete;
 
 public class FileUtils {
@@ -26,7 +25,7 @@ public class FileUtils {
             } else {// 如果是文件
                 InputStream is = context.getAssets().open(assetsPath);
                 FileOutputStream fos = new FileOutputStream(savePath);
-                byte[] buffer = new byte[1024];
+                byte[] buffer = new byte[8192];
                 int byteCount = 0;
                 // 循环从输入流读取
                 while ((byteCount = is.read(buffer)) != -1) {

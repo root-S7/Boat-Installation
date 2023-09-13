@@ -1,6 +1,8 @@
 package ren.icraft.boat.installer.operate;
 
 import android.app.Activity;
+import android.os.AsyncTask;
+import android.os.Handler;
 import android.widget.*;
 import java.util.concurrent.Callable;
 import ren.icraft.boat.installer.R;
@@ -10,7 +12,7 @@ import ren.icraft.boat.installer.tools.IntallAPK;
 /**
  * @author Administrator
 **/
-public class InstallAndDelete implements Callable<String>{
+public class InstallAndDelete extends AsyncTask<Void, Void, Void> {
     private Activity activity;
     private FilesPath filesPath;
     private boolean isInstall;
@@ -63,8 +65,9 @@ public class InstallAndDelete implements Callable<String>{
     public void setProgressBar1(ProgressBar progressBar1) {
         this.progressBar1 = progressBar1;
     }
+
     @Override
-    public String call() {
+    protected Void doInBackground(Void... voids) {
         activity.runOnUiThread(() -> Toast.makeText(activity.getApplicationContext(), R.string.wait_delete, Toast.LENGTH_SHORT).show());
         FileUtils.deleteFolder(filesPath.getDataDirectory(),this);
         activity.findViewById(R.id.loading_text);
@@ -75,5 +78,12 @@ public class InstallAndDelete implements Callable<String>{
             IntallAPK.install(filesPath.getApkDirectory(), activity.getApplicationContext());
         }
         return null;
+    }
+
+    @Override
+    protected void onPostExecute(Void unused) {
+        super.onPostExecute(unused);
+        Handler handler = new Handler();
+        handler.postDelayed(() -> activity.finish(), 1000);
     }
 }

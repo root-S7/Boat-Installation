@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.widget.*;
-
 import ren.icraft.boat.installer.AppApplication;
 import ren.icraft.boat.installer.R;
 import ren.icraft.boat.installer.tools.FileUtils;

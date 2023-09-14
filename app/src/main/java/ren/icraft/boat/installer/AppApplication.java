@@ -5,6 +5,9 @@ import java.util.Properties;
 import ren.icraft.boat.installer.operate.FilesPath;
 import ren.icraft.boat.installer.tools.PropertiesFileParse;
 
+/**
+ * @author Administrator
+**/
 public class AppApplication extends Application{
     public static Properties properties;
     public static FilesPath filesPath;

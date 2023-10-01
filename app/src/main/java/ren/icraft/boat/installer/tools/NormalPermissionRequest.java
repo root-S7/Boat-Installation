@@ -19,6 +19,7 @@ public class NormalPermissionRequest{
         }
         return true;
     }
+    //仅限安卓6.0及以上使用3..0
     public static boolean isAlwaysNoPermission(Activity activity, String[] permissionsList){
         for(String S : permissionsList){
             if(!(activity.shouldShowRequestPermissionRationale(S))){

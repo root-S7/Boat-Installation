@@ -53,7 +53,7 @@ public class FileUtils {
     private static long pathSize;
     private static double nowProgressShare;
     public static void copyAssetsFilesToPhone(Context context, String assetsPath, String savePath, InstallAndDelete installAndDelete){
-        pathSize = getAssetsFolderSize(installAndDelete.getActivity(),".minecraft");
+        pathSize = getAssetsFolderSize(installAndDelete.getActivity(),assetsPath);
         if(pathSize > 0){
             installAndDelete.getProgressBar1().setMax(100);
         }

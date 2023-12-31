@@ -5,9 +5,6 @@ plugins {
 android {
     namespace 'ren.icraft.boat.installer'
     compileSdk 33
-    aaptOptions{
-        ignoreAssetsPattern '!.svn:!.git:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*.scc:*~'
-    }
     defaultConfig {
         applicationId "ren.icraft.boat.installer"
         minSdk 21
@@ -27,6 +24,9 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+    androidResources {
+        ignoreAssetsPattern '!.svn:!.git:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*.scc:*~'
     }
 }
 

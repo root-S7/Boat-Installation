@@ -1,8 +1,6 @@
 pluginManagement {
     repositories {
-        google {
-            url "https://maven.aliyun.com/repository/google"
-        }
+        google()
         mavenCentral {
             url "https://maven.aliyun.com/repository/central"
         }
@@ -14,9 +12,7 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        google {
-            url "https://maven.aliyun.com/repository/google"
-        }
+        google()
         mavenCentral {
             url "https://maven.aliyun.com/repository/central"
         }
